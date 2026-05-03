@@ -2,19 +2,42 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Control Domòtic Telegram</title>
+    
+    <!-- ========================================== -->
+    <!-- CONFIGURACIÓ PER SEMBLAR UNA APP NATIVA    -->
+    <!-- ========================================== -->
+    <meta name="theme-color" content="#1f2937"> <!-- Color de la barra d'estat a Android -->
+    
+    <!-- Etiquetes per a iOS (iPhone/iPad) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Domòtica">
+    
+    <!-- Manifest incrustat (sense necessitat de fitxers externs) per forçar el mode pantalla completa -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Control%20Dom%C3%B2tic%22%2C%22short_name%22%3A%22Dom%C3%B2tica%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%232E2E2E%22%2C%22theme_color%22%3A%22%231f2937%22%7D">
+    <!-- ========================================== -->
+
     <!-- Tailwind CSS per al disseny adaptatiu i estilitzat -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome per a les icones -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Estils personalitzats per suavitzar algunes transicions */
-        body { background-color: #2E2E2E; color: #f3f4f6; }
+        /* Estils personalitzats per suavitzar algunes transicions i evitar selecció de text accidental */
+        body { 
+            background-color: #2E2E2E; 
+            color: #f3f4f6; 
+            -webkit-user-select: none; /* Evita que es seleccioni el text com si fos una web */
+            user-select: none;
+        }
         .btn-press { transition: transform 0.1s; }
         .btn-press:active { transform: scale(0.95); }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* Permetre seleccionar text als camps d'entrada d'ajustos */
+        input { -webkit-user-select: auto; user-select: auto; }
     </style>
 </head>
 <body class="font-sans antialiased min-h-screen flex flex-col">
