@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Domòtic Telegram</title>
+    <!-- Tailwind CSS per al disseny adaptatiu i estilitzat -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome per a les icones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estils personalitzats per suavitzar algunes transicions */
+        body { background-color: #2E2E2E; color: #f3f4f6; }
+        .btn-press { transition: transform 0.1s; }
+        .btn-press:active { transform: scale(0.95); }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Capçalera -->
+    <header class="bg-gray-800 shadow-md p-4 flex justify-between items-center sticky top-0 z-10">
+        <h1 class="text-2xl font-bold text-white"><i class="fas fa-home mr-2 text-blue-400"></i> Domòtica</h1>
+        <button id="btnSettings" class="text-gray-300 hover:text-white p-2 rounded-full hover:bg-gray-700 transition">
+            <i class="fas fa-cog text-xl"></i>
+        </button>
+    </header>
+
+    <!-- Contenidor Principal: Panell de Control -->
+    <main id="viewMain" class="flex-grow p-4 md:p-6 max-w-4xl mx-auto w-full">
+        <div id="controlsContainer" class="space-y-6">
+            <!-- Els botons s'injectaran aquí mitjançant JavaScript -->
+        </div>
+    </main>
+
+    <!-- Contenidor: Configuració -->
+    <main id="viewSettings" class="flex-grow p-4 md:p-6 max-w-4xl mx-auto w-full hidden">
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg mb-6">
+            <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2"><i class="fas fa-key mr-2"></i> API Telegram</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Bot Token (des de @BotFather)</label>
+                    <input type="text" id="inputBotToken" placeholder="Ex: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11" 
+                           class="w-full bg-gray-700 text-white border border-gray-600 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Grup / Chat ID</label>
+                    <input type="text" id="inputChatId" placeholder="Ex: -1003082954760" 
+                           class="w-full bg-gray-700 text-white border border-gray-600 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button id="btnSaveApi" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                        Guardar Configuració
+                    </button>
+                    <button id="btnTestApi" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition">
+                        <i class="fas fa-plug mr-2"></i>Provar Connexió
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+            <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2"><i class="fas fa-plus-circle mr-2"></i> Afegir Nou Botó</h2>
+            <form id="formAddButton" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Grup (Ex: Llum Menjador)</label>
+                        <input type="text" id="inputBtnGroup" required class="w-full bg-gray-700 text-white border border-gray-600 rounded-md p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Text del Botó (Ex: Encendre)</label>
+                        <input type="text" id="inputBtnLabel" required class="w-full bg-gray-700 text-white border border-gray-600 rounded-md p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Comanda (Ex: /llum_on)</label>
+                        <input type="text" id="inputBtnCommand" required class="w-full bg-gray-700 text-white border border-gray-600 rounded-md p-2">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition">
+                    Crear Botó
+                </button>
+            </form>
+
+            <h3 class="text-lg font-bold mt-8 mb-4">Botons Actuals</h3>
+            <div id="settingsButtonsList" class="space-y-2">
+                <!-- Llista de botons per eliminar -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Notificacions (Toasts) -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        /**
+         * ---------------------------------------------------------
+         * MÒDUL 1: GESTIÓ DE DADES I CONFIGURACIÓ (Local Storage)
+         * ---------------------------------------------------------
+         */
+        const DataManager = {
+            // Botons per defecte si és la primera vegada que s'obre
+            defaultButtons: [
+                { id: 1, group: 'Endoll 1', label: 'Encendre', command: '/e1' },
+                { id: 2, group: 'Endoll 1', label: 'Apagar', command: '/e1off' },
+                { id: 3, group: 'Endoll 2', label: 'Encendre', command: '/end2' },
+                { id: 4, group: 'Endoll 2', label: 'Apagar', command: '/end2off' },
+                { id: 5, group: 'Persiana', label: 'Pujar', command: '/pujar_persiana' },
+                { id: 6, group: 'Persiana', label: 'Baixar', command: '/baixar_persiana' },
+                { id: 7, group: 'Persiana', label: 'Parar', command: '/parar_persiana' },
+                { id: 8, group: 'Llum Menjador', label: 'Encendre', command: '/llum_menjador_on' },
+                { id: 9, group: 'Llum Menjador', label: 'Apagar', command: '/llum_menjador_off' },
+                { id: 10, group: 'Rentaplats', label: 'Encendre', command: '/rentaplats_on' },
+                { id: 11, group: 'Rentaplats', label: 'Apagar', command: '/rentaplats_off' }
+            ],
+
+            getConfig() {
+                return {
+                    botToken: localStorage.getItem('tg_bot_token') || '',
+                    chatId: localStorage.getItem('tg_chat_id') || ''
+                };
+            },
+
+            saveConfig(botToken, chatId) {
+                localStorage.setItem('tg_bot_token', botToken.trim());
+                localStorage.setItem('tg_chat_id', chatId.trim());
+            },
+
+            getButtons() {
+                const btns = localStorage.getItem('tg_buttons');
+                return btns ? JSON.parse(btns) : this.defaultButtons;
+            },
+
+            saveButtons(buttonsArray) {
+                localStorage.setItem('tg_buttons', JSON.stringify(buttonsArray));
+            },
+
+            addButton(group, label, command) {
+                const btns = this.getButtons();
+                const newId = btns.length > 0 ? Math.max(...btns.map(b => b.id)) + 1 : 1;
+                btns.push({ id: newId, group, label, command });
+                this.saveButtons(btns);
+            },
+
+            deleteButton(id) {
+                const btns = this.getButtons().filter(b => b.id !== id);
+                this.saveButtons(btns);
+            }
+        };
+
+        /**
+         * ---------------------------------------------------------
+         * MÒDUL 2: CONNEXIÓ A TELEGRAM (Bot API)
+         * ---------------------------------------------------------
+         */
+        const TelegramAPI = {
+            async sendMessage(command, uiButtonElement) {
+                const config = DataManager.getConfig();
+                
+                if (!config.botToken || !config.chatId) {
+                    UI.showToast("⚠️ Faltes dades! Configura l'API a Ajustos.", "error");
+                    UI.showView('Settings');
+                    return false;
+                }
+
+                const url = `https://api.telegram.org/bot${config.botToken}/sendMessage`;
+                const payload = {
+                    chat_id: config.chatId,
+                    text: command
+                };
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.ok) {
+                        console.log(`✅ Missatge enviat: ${command}`);
+                        return true;
+                    } else {
+                        console.error('Error Telegram:', data.description);
+                        UI.showToast(`⚠️ Error Telegram: ${data.description}`, "error");
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error de xarxa:', error);
+                    UI.showToast("❌ Error de connexió. Comprova internet.", "error");
+                    return false;
+                }
+            }
+        };
+
+        /**
+         * ---------------------------------------------------------
+         * MÒDUL 3: INTERFÍCIE D'USUARI I ESDEVENIMENTS (DOM)
+         * ---------------------------------------------------------
+         */
+        const UI = {
+            currentView: 'Main',
+
+            init() {
+                // Vincular botons de la UI
+                document.getElementById('btnSettings').addEventListener('click', () => this.toggleView());
+                document.getElementById('btnSaveApi').addEventListener('click', () => this.handleSaveApi());
+                document.getElementById('btnTestApi').addEventListener('click', () => this.handleTestApi());
+                document.getElementById('formAddButton').addEventListener('submit', (e) => this.handleAddButton(e));
+
+                // Comprovar si hi ha configuració existent
+                const config = DataManager.getConfig();
+                if (!config.botToken || !config.chatId) {
+                    this.showView('Settings');
+                    this.showToast("👋 Benvingut! Configura el Bot i el Grup per començar.", "info");
+                } else {
+                    this.showView('Main');
+                }
+            },
+
+            showView(viewName) {
+                this.currentView = viewName;
+                if (viewName === 'Main') {
+                    document.getElementById('viewMain').classList.remove('hidden');
+                    document.getElementById('viewSettings').classList.add('hidden');
+                    this.renderControlPanel();
+                } else {
+                    document.getElementById('viewMain').classList.add('hidden');
+                    document.getElementById('viewSettings').classList.remove('hidden');
+                    this.renderSettingsPanel();
+                }
+            },
+
+            toggleView() {
+                this.showView(this.currentView === 'Main' ? 'Settings' : 'Main');
+            },
+
+            // --- PANELL PRINCIPAL ---
+            renderControlPanel() {
+                const container = document.getElementById('controlsContainer');
+                container.innerHTML = ''; // Netejar
+                
+                const buttons = DataManager.getButtons();
+                if (buttons.length === 0) {
+                    container.innerHTML = `<p class="text-gray-400 text-center">No hi ha cap botó configurat. Ves als ajustos per afegir-ne.</p>`;
+                    return;
+                }
+
+                // Agrupar botons per "group"
+                const groupedButtons = buttons.reduce((acc, btn) => {
+                    if (!acc[btn.group]) acc[btn.group] = [];
+                    acc[btn.group].push(btn);
+                    return acc;
+                }, {});
+
+                // Generar HTML per cada grup
+                for (const [groupName, groupBtns] of Object.entries(groupedButtons)) {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = "bg-gray-800 rounded-lg p-4 shadow-md";
+                    
+                    const title = document.createElement('h2');
+                    title.className = "text-xl font-bold mb-3 text-gray-200";
+                    title.textContent = groupName;
+                    groupDiv.appendChild(title);
+
+                    const btnGrid = document.createElement('div');
+                    btnGrid.className = "grid grid-cols-2 sm:grid-cols-3 gap-3";
+
+                    groupBtns.forEach(btn => {
+                        const buttonEl = document.createElement('button');
+                        // Color per defecte basat en el text per semblar-se a Kivy
+                        let baseColor = "bg-gray-600 hover:bg-gray-500";
+                        if (btn.label.toLowerCase().includes('encend') || btn.label.toLowerCase().includes('pujar')) baseColor = "bg-green-600 hover:bg-green-500";
+                        if (btn.label.toLowerCase().includes('apag') || btn.label.toLowerCase().includes('baixar')) baseColor = "bg-red-600 hover:bg-red-500";
+
+                        buttonEl.className = `${baseColor} text-white font-bold py-3 px-4 rounded btn-press flex flex-col items-center justify-center`;
+                        buttonEl.innerHTML = `<span>${btn.label}</span><span class="text-xs opacity-50 mt-1">${btn.command}</span>`;
+                        
+                        buttonEl.addEventListener('click', () => this.handleCommandSend(btn.command, buttonEl));
+                        btnGrid.appendChild(buttonEl);
+                    });
+
+                    groupDiv.appendChild(btnGrid);
+                    container.appendChild(groupDiv);
+                }
+            },
+
+            // Acció d'enviar i efectes visuals del botó
+            async handleCommandSend(command, buttonEl) {
+                const originalHtml = buttonEl.innerHTML;
+                const originalClasses = buttonEl.className;
+
+                buttonEl.className = "bg-yellow-600 text-white font-bold py-3 px-4 rounded flex items-center justify-center cursor-not-allowed opacity-80";
+                buttonEl.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Enviant...`;
+                buttonEl.disabled = true;
+
+                const success = await TelegramAPI.sendMessage(command, buttonEl);
+
+                setTimeout(() => {
+                    buttonEl.className = originalClasses;
+                    buttonEl.innerHTML = originalHtml;
+                    buttonEl.disabled = false;
+                    
+                    if(success) {
+                        this.showToast(`✅ Comanda ${command} enviada!`, "success");
+                    }
+                }, 500);
+            },
+
+            // --- PANELL D'AJUSTOS ---
+            renderSettingsPanel() {
+                const config = DataManager.getConfig();
+                document.getElementById('inputBotToken').value = config.botToken;
+                document.getElementById('inputChatId').value = config.chatId;
+
+                const listContainer = document.getElementById('settingsButtonsList');
+                listContainer.innerHTML = '';
+                
+                const buttons = DataManager.getButtons();
+                buttons.forEach(btn => {
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center bg-gray-700 p-3 rounded";
+                    item.innerHTML = `
+                        <div>
+                            <span class="font-bold text-blue-400">${btn.group}</span> - ${btn.label} 
+                            <span class="text-gray-400 text-sm ml-2">(${btn.command})</span>
+                        </div>
+                        <button class="text-red-400 hover:text-red-300 p-2" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    item.querySelector('button').addEventListener('click', () => {
+                        DataManager.deleteButton(btn.id);
+                        this.renderSettingsPanel();
+                        this.showToast("Botó eliminat", "info");
+                    });
+                    listContainer.appendChild(item);
+                });
+            },
+
+            handleSaveApi() {
+                const token = document.getElementById('inputBotToken').value;
+                const chatId = document.getElementById('inputChatId').value;
+                DataManager.saveConfig(token, chatId);
+                this.showToast("Configuració de Telegram guardada correctament!", "success");
+            },
+
+            // NOVA FUNCIÓ per provar directament l'API abans de guardar
+            async handleTestApi() {
+                const token = document.getElementById('inputBotToken').value.trim();
+                const chatId = document.getElementById('inputChatId').value.trim();
+
+                if (!token || !chatId) {
+                    this.showToast("⚠️ Introdueix el Bot Token i el Chat ID primer", "error");
+                    return;
+                }
+
+                const btn = document.getElementById('btnTestApi');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Provant...`;
+                btn.disabled = true;
+
+                const url = `https://api.telegram.org/bot${token}/sendMessage`;
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: chatId, text: '🔌 Prova de connexió des de la Web App Domòtica exitosa!' })
+                    });
+                    const data = await response.json();
+                    
+                    if (data.ok) {
+                        this.showToast("✅ Connexió correcta! S'ha enviat un missatge de prova.", "success");
+                    } else {
+                        let errMsg = data.description;
+                        if (errMsg.includes("Not Found")) errMsg = "El Token del Bot no és vàlid.";
+                        if (errMsg.includes("chat not found")) errMsg = "Chat ID incorrecte o el Bot no està dins del grup.";
+                        this.showToast(`❌ Error: ${errMsg}`, "error");
+                    }
+                } catch (error) {
+                    this.showToast("❌ Error de connexió amb Telegram (Problema de xarxa)", "error");
+                }
+
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            },
+
+            handleAddButton(event) {
+                event.preventDefault();
+                const group = document.getElementById('inputBtnGroup').value;
+                const label = document.getElementById('inputBtnLabel').value;
+                const command = document.getElementById('inputBtnCommand').value;
+
+                DataManager.addButton(group, label, command);
+                
+                document.getElementById('inputBtnLabel').value = '';
+                document.getElementById('inputBtnCommand').value = '';
+                
+                this.renderSettingsPanel();
+                this.showToast("Botó afegit correctament!", "success");
+            },
+
+            // --- UTILITATS ---
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                
+                let bgColor = "bg-blue-600";
+                if (type === 'success') bgColor = "bg-green-600";
+                if (type === 'error') bgColor = "bg-red-600";
+
+                toast.className = `${bgColor} text-white px-4 py-3 rounded shadow-lg toast-enter flex items-center`;
+                toast.innerHTML = message;
+
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => toast.remove(), 500);
+                }, 3000); // El missatge de prova dura 3 segons en pantalla
+            }
+        };
+
+        // Inicialitzar l'aplicació en carregar la pàgina
+        document.addEventListener('DOMContentLoaded', () => {
+            UI.init();
+        });
+
+    </script>
+</body>
+</html>
