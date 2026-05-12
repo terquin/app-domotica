@@ -3,1474 +3,666 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Control Domòtic Telegram</title>
+    <title>Control Domòtic</title>
     <meta name="theme-color" content="#0a0f1e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Domòtica">
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Control%20Dom%C3%B2tic%22%2C%22short_name%22%3A%22Dom%C3%B2tica%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%220a0f1e%22%2C%22theme_color%22%3A%220a0f1e%22%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Dom%C3%B2tica%22%2C%22short_name%22%3A%22Dom%C3%B2tica%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%220a0f1e%22%2C%22theme_color%22%3A%220a0f1e%22%7D">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #060b18;
-            --bg-main: #0a0f1e;
-            --bg-panel: #0d1528;
-            --bg-card: #111c35;
-            --bg-elevated: #172040;
-            --accent-cyan: #00d4ff;
-            --accent-blue: #0077ff;
-            --accent-green: #00e676;
-            --accent-red: #ff3d71;
-            --accent-amber: #ffab00;
-            --accent-purple: #7c4dff;
-            --text-primary: #e8f4fd;
-            --text-secondary: #8ab0d0;
-            --text-muted: #4a6a8a;
-            --border-subtle: rgba(0,212,255,0.1);
-            --border-glow: rgba(0,212,255,0.3);
-            --glow-cyan: 0 0 20px rgba(0,212,255,0.4);
-            --glow-blue: 0 0 20px rgba(0,119,255,0.4);
-            --glow-green: 0 0 20px rgba(0,230,118,0.4);
-            --glow-red: 0 0 20px rgba(255,61,113,0.4);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background-color: var(--bg-main);
-            background-image:
-                radial-gradient(ellipse at 20% 20%, rgba(0,119,255,0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(0,212,255,0.04) 0%, transparent 50%);
-            color: var(--text-primary);
-            font-family: 'Exo 2', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            -webkit-user-select: none;
-            user-select: none;
-            overflow-x: hidden;
-        }
-
-        input, textarea { -webkit-user-select: auto; user-select: auto; }
-
-        /* ===== HEADER ===== */
-        header {
-            background: linear-gradient(180deg, rgba(10,15,30,0.98) 0%, rgba(10,15,30,0.92) 100%);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            box-shadow: var(--glow-cyan);
-        }
-
-        .logo-text {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-transform: uppercase;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .header-btn {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-secondary);
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 16px;
-        }
-
-        .header-btn:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-            box-shadow: var(--glow-cyan);
-            background: var(--bg-elevated);
-        }
-
-        .header-btn.active {
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            border-color: var(--accent-cyan);
-            color: #fff;
-            box-shadow: var(--glow-cyan);
-        }
-
-        /* ===== NAV TABS ===== */
-        .nav-tabs {
-            display: flex;
-            background: var(--bg-panel);
-            border-bottom: 1px solid var(--border-subtle);
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .nav-tabs::-webkit-scrollbar { display: none; }
-
-        .nav-tab {
-            flex: 1;
-            min-width: 100px;
-            padding: 12px 16px;
-            text-align: center;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .nav-tab:hover { color: var(--text-secondary); }
-
-        .nav-tab.active {
-            color: var(--accent-cyan);
-            border-bottom-color: var(--accent-cyan);
-            background: rgba(0,212,255,0.04);
-        }
-
-        /* ===== MAIN CONTENT ===== */
-        main {
-            flex: 1;
-            padding: 16px;
-            max-width: 900px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .view { display: none; }
-        .view.active { display: block; }
-
-        /* ===== CONTROL PANEL ===== */
-        .group-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-            transition: border-color 0.2s;
-        }
-
-        .group-card:hover { border-color: var(--border-glow); }
-
-        .group-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
-
-        .group-indicator {
-            width: 4px;
-            height: 24px;
-            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));
-            border-radius: 2px;
-            box-shadow: 0 0 8px rgba(0,212,255,0.5);
-        }
-
-        .group-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 17px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: var(--text-primary);
-        }
-
-        .btn-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 10px;
-        }
-
-        .ctrl-btn {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-primary);
-            border-radius: 12px;
-            padding: 14px 8px;
-            cursor: pointer;
-            transition: all 0.15s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-height: 72px;
-            font-family: 'Exo 2', sans-serif;
-        }
-
-        .ctrl-btn:active { transform: scale(0.94); }
-
-        .ctrl-btn .btn-label {
-            font-size: 14px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .ctrl-btn .btn-cmd {
-            font-size: 10px;
-            color: var(--text-muted);
-            font-family: 'Rajdhani', sans-serif;
-            letter-spacing: 0.5px;
-        }
-
-        .ctrl-btn.btn-on {
-            background: rgba(0,230,118,0.08);
-            border-color: rgba(0,230,118,0.3);
-        }
-
-        .ctrl-btn.btn-on:hover {
-            background: rgba(0,230,118,0.15);
-            border-color: var(--accent-green);
-            box-shadow: var(--glow-green);
-            color: var(--accent-green);
-        }
-
-        .ctrl-btn.btn-off {
-            background: rgba(255,61,113,0.08);
-            border-color: rgba(255,61,113,0.3);
-        }
-
-        .ctrl-btn.btn-off:hover {
-            background: rgba(255,61,113,0.15);
-            border-color: var(--accent-red);
-            box-shadow: var(--glow-red);
-            color: var(--accent-red);
-        }
-
-        .ctrl-btn.btn-neutral:hover {
-            background: rgba(0,119,255,0.15);
-            border-color: var(--accent-blue);
-            box-shadow: var(--glow-blue);
-            color: var(--accent-cyan);
-        }
-
-        .ctrl-btn.sending {
-            background: rgba(255,171,0,0.1);
-            border-color: var(--accent-amber);
-            color: var(--accent-amber);
-            cursor: not-allowed;
-        }
-
-        /* ===== SETTINGS PANEL ===== */
-        .settings-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: var(--accent-cyan);
-            margin-bottom: 16px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-group { margin-bottom: 14px; }
-
-        .form-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-
-        .form-input {
-            width: 100%;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-primary);
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 14px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            outline: none;
-        }
-
-        .form-input:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-        }
-
-        /* ===== BUTTONS ===== */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-            width: 100%;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(0,119,255,0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0,119,255,0.5);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #00b248, var(--accent-green));
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(0,230,118,0.3);
-        }
-
-        .btn-success:hover { transform: translateY(-1px); }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #cc0033, var(--accent-red));
-            color: #fff;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #cc7700, var(--accent-amber));
-            color: #fff;
-        }
-
-        .btn-ghost {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-secondary);
-        }
-
-        .btn-ghost:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-
-        .btn-purple {
-            background: linear-gradient(135deg, #5500cc, var(--accent-purple));
-            color: #fff;
-        }
-
-        .btn-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 14px;
-        }
-
-        .btn-row-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-top: 14px;
-        }
-
-        /* ===== BUTTON LIST ===== */
-        .btn-list-item {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: border-color 0.2s;
-        }
-
-        .btn-list-item:hover { border-color: var(--border-glow); }
-
-        .btn-list-info { flex: 1; min-width: 0; }
-
-        .btn-list-group {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--accent-cyan);
-            margin-bottom: 2px;
-        }
-
-        .btn-list-label {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .btn-list-cmd {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-family: 'Rajdhani', sans-serif;
-            margin-top: 2px;
-        }
-
-        .btn-list-actions {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .icon-btn {
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: 1px solid var(--border-subtle);
-            background: var(--bg-card);
-            font-size: 13px;
-            transition: all 0.2s;
-        }
-
-        .icon-btn-edit {
-            color: var(--accent-cyan);
-        }
-
-        .icon-btn-edit:hover {
-            background: rgba(0,212,255,0.1);
-            border-color: var(--accent-cyan);
-        }
-
-        .icon-btn-delete {
-            color: var(--accent-red);
-        }
-
-        .icon-btn-delete:hover {
-            background: rgba(255,61,113,0.1);
-            border-color: var(--accent-red);
-        }
-
-        /* ===== MODAL ===== */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(6,11,24,0.85);
-            backdrop-filter: blur(8px);
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-
-        .modal-overlay.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal {
-            background: var(--bg-card);
-            border: 1px solid var(--border-glow);
-            border-radius: 20px;
-            padding: 24px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5), var(--glow-cyan);
-            transform: translateY(20px);
-            transition: transform 0.2s;
-        }
-
-        .modal-overlay.open .modal {
-            transform: translateY(0);
-        }
-
-        .modal-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--accent-cyan);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* ===== BACKUP SECTION ===== */
-        .backup-card {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .backup-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .backup-icon-export {
-            background: rgba(0,119,255,0.15);
-            border: 1px solid rgba(0,119,255,0.3);
-            color: var(--accent-blue);
-        }
-
-        .backup-icon-import {
-            background: rgba(124,77,255,0.15);
-            border: 1px solid rgba(124,77,255,0.3);
-            color: var(--accent-purple);
-        }
-
-        .backup-text { flex: 1; }
-        .backup-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
-        .backup-desc { font-size: 12px; color: var(--text-muted); }
-
-        /* ===== TOAST ===== */
-        #toastContainer {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 300;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            width: 90%;
-            max-width: 380px;
-            pointer-events: none;
-        }
-
-        .toast {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 12px 18px;
-            font-size: 14px;
-            font-weight: 500;
-            width: 100%;
-            text-align: center;
-            animation: toastIn 0.3s ease-out;
-            pointer-events: auto;
-        }
-
-        .toast-success { border: 1px solid rgba(0,230,118,0.4); color: var(--accent-green); box-shadow: var(--glow-green); }
-        .toast-error { border: 1px solid rgba(255,61,113,0.4); color: var(--accent-red); box-shadow: var(--glow-red); }
-        .toast-info { border: 1px solid rgba(0,212,255,0.3); color: var(--accent-cyan); box-shadow: var(--glow-cyan); }
-
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* ===== BADGE ===== */
-        .badge {
-            display: inline-block;
-            background: rgba(0,212,255,0.15);
-            border: 1px solid rgba(0,212,255,0.3);
-            color: var(--accent-cyan);
-            border-radius: 6px;
-            padding: 2px 8px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            font-family: 'Rajdhani', sans-serif;
-        }
-
-        /* ===== EMPTY STATE ===== */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-        }
-
-        .empty-state i {
-            font-size: 40px;
-            margin-bottom: 12px;
-            display: block;
-            color: var(--text-muted);
-        }
-
-        .empty-state p {
-            font-size: 15px;
-        }
-
-        /* ===== HIDDEN FILE INPUT ===== */
-        #importFileInput { display: none; }
-
-        /* ===== DRAG HANDLE ===== */
-        .drag-handle {
-            color: var(--text-muted);
-            cursor: grab;
-            padding: 0 4px;
-            font-size: 14px;
-        }
-
-        /* ===== MODE CARDS ===== */
-        .mode-card {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-        .mode-card:hover { border-color: var(--border-glow); }
-        .mode-card.selected {
-            border-color: var(--accent-cyan);
-            background: rgba(0,212,255,0.06);
-            box-shadow: var(--glow-cyan);
-        }
-        .mode-icon {
-            width: 44px; height: 44px; border-radius: 12px; border: 1px solid;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; margin: 0 auto 8px;
-        }
-        .mode-title {
-            font-family: 'Rajdhani', sans-serif; font-weight: 700;
-            font-size: 14px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;
-        }
-        .mode-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
-
-        /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: var(--bg-main); }
-        ::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 2px; }
-
-        /* ===== STATUS DOT ===== */
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-muted);
-            display: inline-block;
-        }
-        .status-dot.connected { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
-        .status-dot.error { background: var(--accent-red); }
-
-        @media (max-width: 480px) {
-            .btn-row-3 { grid-template-columns: 1fr 1fr; }
-        }
+            --bg-main:#0a0f1e; --bg-panel:#0d1528; --bg-card:#111c35; --bg-elevated:#172040;
+            --accent-cyan:#00d4ff; --accent-blue:#0077ff; --accent-green:#00e676;
+            --accent-red:#ff3d71; --accent-amber:#ffab00; --accent-purple:#7c4dff;
+            --text-primary:#e8f4fd; --text-secondary:#8ab0d0; --text-muted:#4a6a8a;
+            --border-subtle:rgba(0,212,255,0.1); --border-glow:rgba(0,212,255,0.3);
+            --glow-cyan:0 0 20px rgba(0,212,255,0.4); --glow-green:0 0 20px rgba(0,230,118,0.4); --glow-red:0 0 20px rgba(255,61,113,0.4);
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{background:var(--bg-main);background-image:radial-gradient(ellipse at 20% 20%,rgba(0,119,255,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(0,212,255,0.04) 0%,transparent 50%);color:var(--text-primary);font-family:'Exo 2',sans-serif;min-height:100vh;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none}
+        input,textarea{-webkit-user-select:auto;user-select:auto}
+
+        /* HEADER */
+        header{background:rgba(10,15,30,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-subtle);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+        .logo{display:flex;align-items:center;gap:10px}
+        .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:var(--glow-cyan)}
+        .logo-text{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .header-actions{display:flex;gap:8px;align-items:center}
+        .header-btn{background:var(--bg-card);border:1px solid var(--border-subtle);color:var(--text-secondary);width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;font-size:16px}
+        .header-btn:hover{border-color:var(--accent-cyan);color:var(--accent-cyan)}
+        .user-pill{display:flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:20px;padding:4px 12px 4px 8px;font-size:13px;color:var(--text-secondary);cursor:pointer}
+        .user-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-green);box-shadow:0 0 6px var(--accent-green)}
+
+        /* NAV */
+        .nav-tabs{display:flex;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle);overflow-x:auto;scrollbar-width:none}
+        .nav-tabs::-webkit-scrollbar{display:none}
+        .nav-tab{flex:1;min-width:90px;padding:12px 14px;text-align:center;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap}
+        .nav-tab.active{color:var(--accent-cyan);border-bottom-color:var(--accent-cyan);background:rgba(0,212,255,0.04)}
+
+        /* MAIN */
+        main{flex:1;padding:16px;max-width:900px;width:100%;margin:0 auto}
+        .view{display:none}.view.active{display:block}
+
+        /* CONTROL BUTTONS */
+        .group-card{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;padding:16px;margin-bottom:16px}
+        .group-card:hover{border-color:var(--border-glow)}
+        .group-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+        .group-indicator{width:4px;height:24px;background:linear-gradient(180deg,var(--accent-cyan),var(--accent-blue));border-radius:2px;box-shadow:0 0 8px rgba(0,212,255,0.5)}
+        .group-title{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+        .btn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+        .ctrl-btn{background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-primary);border-radius:12px;padding:14px 8px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:72px;font-family:'Exo 2',sans-serif}
+        .ctrl-btn:active{transform:scale(0.94)}
+        .ctrl-btn .btn-label{font-size:14px;font-weight:600;text-align:center}
+        .ctrl-btn .btn-cmd{font-size:10px;color:var(--text-muted);font-family:'Rajdhani',sans-serif}
+        .ctrl-btn.btn-on{background:rgba(0,230,118,0.08);border-color:rgba(0,230,118,0.3)}
+        .ctrl-btn.btn-on:hover{background:rgba(0,230,118,0.15);border-color:var(--accent-green);box-shadow:var(--glow-green);color:var(--accent-green)}
+        .ctrl-btn.btn-off{background:rgba(255,61,113,0.08);border-color:rgba(255,61,113,0.3)}
+        .ctrl-btn.btn-off:hover{background:rgba(255,61,113,0.15);border-color:var(--accent-red);box-shadow:var(--glow-red);color:var(--accent-red)}
+        .ctrl-btn.btn-neutral:hover{background:rgba(0,119,255,0.15);border-color:var(--accent-blue);color:var(--accent-cyan)}
+        .ctrl-btn.sending{background:rgba(255,171,0,0.1);border-color:var(--accent-amber);color:var(--accent-amber);cursor:not-allowed}
+
+        /* SETTINGS */
+        .settings-section{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;padding:20px;margin-bottom:16px}
+        .section-title{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent-cyan);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px}
+        .form-group{margin-bottom:14px}
+        .form-label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+        .form-input{width:100%;background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-primary);border-radius:10px;padding:10px 14px;font-family:'Exo 2',sans-serif;font-size:14px;transition:border-color 0.2s;outline:none}
+        .form-input:focus{border-color:var(--accent-cyan);box-shadow:0 0 0 3px rgba(0,212,255,0.1)}
+        .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+
+        /* BUTTONS */
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;transition:all 0.2s;width:100%}
+        .btn:disabled{opacity:0.5;cursor:not-allowed}
+        .btn-primary{background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));color:#fff;box-shadow:0 4px 15px rgba(0,119,255,0.3)}
+        .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,119,255,0.5)}
+        .btn-success{background:linear-gradient(135deg,#00b248,var(--accent-green));color:#fff}
+        .btn-danger{background:linear-gradient(135deg,#cc0033,var(--accent-red));color:#fff}
+        .btn-ghost{background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-secondary)}
+        .btn-ghost:hover{border-color:var(--accent-cyan);color:var(--accent-cyan)}
+        .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+
+        /* BUTTON LIST */
+        .btn-list-item{background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+        .btn-list-item:hover{border-color:var(--border-glow)}
+        .btn-list-info{flex:1;min-width:0}
+        .btn-list-group{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent-cyan);margin-bottom:2px}
+        .btn-list-label{font-size:15px;font-weight:600}
+        .btn-list-cmd{font-size:12px;color:var(--text-muted);font-family:'Rajdhani',sans-serif;margin-top:2px}
+        .btn-list-actions{display:flex;gap:6px;flex-shrink:0}
+        .icon-btn{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--border-subtle);background:var(--bg-card);font-size:13px;transition:all 0.2s}
+        .icon-btn-edit{color:var(--accent-cyan)}.icon-btn-edit:hover{background:rgba(0,212,255,0.1);border-color:var(--accent-cyan)}
+        .icon-btn-delete{color:var(--accent-red)}.icon-btn-delete:hover{background:rgba(255,61,113,0.1);border-color:var(--accent-red)}
+        .badge{display:inline-block;background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.3);color:var(--accent-cyan);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;font-family:'Rajdhani',sans-serif}
+        .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted)}
+        .empty-state i{font-size:40px;margin-bottom:12px;display:block}
+
+        /* MODAL */
+        .modal-overlay{position:fixed;inset:0;background:rgba(6,11,24,0.85);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s}
+        .modal-overlay.open{opacity:1;pointer-events:auto}
+        .modal{background:var(--bg-card);border:1px solid var(--border-glow);border-radius:20px;padding:24px;width:100%;max-width:450px;box-shadow:0 20px 60px rgba(0,0,0,0.5),var(--glow-cyan);transform:translateY(20px);transition:transform 0.2s}
+        .modal-overlay.open .modal{transform:translateY(0)}
+        .modal-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent-cyan);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+
+        /* LOGIN */
+        #loginScreen{position:fixed;inset:0;background:var(--bg-main);background-image:radial-gradient(ellipse at 30% 30%,rgba(0,119,255,0.08) 0%,transparent 60%);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+        .login-box{background:var(--bg-card);border:1px solid var(--border-glow);border-radius:24px;padding:32px 28px;width:100%;max-width:420px;box-shadow:0 30px 80px rgba(0,0,0,0.6),var(--glow-cyan)}
+        .login-logo{text-align:center;margin-bottom:28px}
+        .login-logo-icon{width:64px;height:64px;margin:0 auto 12px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:var(--glow-cyan)}
+        .login-title{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .login-subtitle{font-size:13px;color:var(--text-muted);margin-top:4px}
+        .login-step{display:none}.login-step.active{display:block}
+        .step-label{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px}
+        .info-note{background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:14px}
+        .info-note a{color:var(--accent-cyan);text-decoration:none}
+
+        /* BACKUP */
+        .backup-card{background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+        .backup-icon{width:44px;height:44px;border-radius:12px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+        .backup-text{flex:1}
+        .backup-title{font-size:14px;font-weight:700;margin-bottom:2px}
+        .backup-desc{font-size:12px;color:var(--text-muted)}
+
+        /* TOAST */
+        #toastContainer{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:600;display:flex;flex-direction:column;align-items:center;gap:8px;width:90%;max-width:380px;pointer-events:none}
+        .toast{background:var(--bg-card);border-radius:12px;padding:12px 18px;font-size:14px;font-weight:500;width:100%;text-align:center;animation:toastIn 0.3s ease-out;pointer-events:auto}
+        .toast-success{border:1px solid rgba(0,230,118,0.4);color:var(--accent-green);box-shadow:var(--glow-green)}
+        .toast-error{border:1px solid rgba(255,61,113,0.4);color:var(--accent-red)}
+        .toast-info{border:1px solid rgba(0,212,255,0.3);color:var(--accent-cyan)}
+        @keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg-main)}::-webkit-scrollbar-thumb{background:var(--border-glow);border-radius:2px}
+        #importFileInput{display:none}
     </style>
 </head>
 <body>
 
-    <!-- HEADER -->
-    <header>
-        <div class="logo">
-            <div class="logo-icon"><i class="fas fa-house-signal"></i></div>
-            <span class="logo-text">Domòtica</span>
-        </div>
-        <div class="header-actions">
-            <div id="statusIndicator" title="Estat API" style="display:flex;align-items:center;padding:0 8px;gap:6px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:10px;height:40px;font-size:12px;color:var(--text-muted);">
-                <span class="status-dot" id="statusDot"></span>
-                <span id="statusText">API</span>
-            </div>
-            <button class="header-btn" id="btnSettingsHeader" title="Ajustos"><i class="fas fa-sliders"></i></button>
-        </div>
-    </header>
-
-    <!-- NAV TABS -->
-    <div class="nav-tabs" id="navTabs">
-        <div class="nav-tab active" data-view="control">
-            <i class="fas fa-toggle-on" style="margin-right:6px"></i>Control
-        </div>
-        <div class="nav-tab" data-view="settings">
-            <i class="fas fa-key" style="margin-right:6px"></i>API
-        </div>
-        <div class="nav-tab" data-view="buttons">
-            <i class="fas fa-table-cells" style="margin-right:6px"></i>Botons
-        </div>
-        <div class="nav-tab" data-view="backup">
-            <i class="fas fa-cloud-arrow-down" style="margin-right:6px"></i>Còpia
-        </div>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon"><i class="fas fa-house-signal"></i></div>
+      <div class="login-title">Domòtica</div>
+      <div class="login-subtitle">Control via Telegram</div>
     </div>
 
-    <!-- VIEWS -->
-    <main>
-
-        <!-- VIEW: CONTROL -->
-        <div class="view active" id="view-control">
-            <div id="controlsContainer"></div>
-        </div>
-
-        <!-- VIEW: API SETTINGS -->
-        <div class="view" id="view-settings">
-
-            <!-- MODE SELECTOR -->
-            <div class="settings-section">
-                <div class="section-title"><i class="fas fa-sliders"></i> Mode d'enviament</div>
-                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px">
-                    Tria com vols enviar els missatges a Telegram.
-                </p>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                    <div id="modeCardBot" class="mode-card" data-mode="bot">
-                        <div class="mode-icon" style="background:rgba(0,119,255,0.15);border-color:rgba(0,119,255,0.3);color:var(--accent-blue)">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="mode-title">Bot API</div>
-                        <div class="mode-desc">Envia com el bot. Requereix Bot Token.</div>
-                    </div>
-                    <div id="modeCardUser" class="mode-card" data-mode="userbot">
-                        <div class="mode-icon" style="background:rgba(124,77,255,0.15);border-color:rgba(124,77,255,0.3);color:var(--accent-purple)">
-                            <i class="fas fa-user-secret"></i>
-                        </div>
-                        <div class="mode-title">Userbot</div>
-                        <div class="mode-desc">Envia com TU. Requereix servidor local.</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BOT API CONFIG -->
-            <div class="settings-section" id="sectionBotApi">
-                <div class="section-title"><i class="fas fa-robot"></i> Bot API</div>
-                <div class="form-group">
-                    <label class="form-label">Bot Token (des de @BotFather)</label>
-                    <input type="text" id="inputBotToken" class="form-input" placeholder="Ex: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Grup / Chat ID</label>
-                    <input type="text" id="inputChatId" class="form-input" placeholder="Ex: -1003082954760">
-                </div>
-                <div class="btn-row">
-                    <button class="btn btn-primary" id="btnSaveApi"><i class="fas fa-save"></i> Guardar</button>
-                    <button class="btn btn-purple" id="btnTestApi"><i class="fas fa-plug"></i> Provar</button>
-                </div>
-            </div>
-
-            <!-- USERBOT CONFIG -->
-            <div class="settings-section" id="sectionUserbot" style="display:none">
-                <div class="section-title"><i class="fas fa-user-secret"></i> Userbot (servidor local)</div>
-
-                <div class="info-box" style="background:rgba(124,77,255,0.08);border:1px solid rgba(124,77,255,0.25);border-radius:12px;padding:14px;margin-bottom:16px">
-                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">
-                        <i class="fas fa-circle-info" style="color:var(--accent-purple);margin-right:6px"></i>
-                        El <strong style="color:var(--text-primary)">userbot_server.py</strong> ha d'estar en execució a casa teva (Raspberry Pi, PC, NAS...) per enviar missatges com a tu.
-                        <br><br>
-                        Descarrega'l a la pestanya <strong style="color:var(--text-primary)">Còpia</strong> i segueix les instruccions.
-                    </p>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">URL del servidor local</label>
-                    <input type="text" id="inputUserbotUrl" class="form-input" placeholder="Ex: http://192.168.1.50:8765">
-                </div>
-                <div class="btn-row">
-                    <button class="btn btn-primary" id="btnSaveUserbot"><i class="fas fa-save"></i> Guardar</button>
-                    <button class="btn btn-purple" id="btnTestUserbot"><i class="fas fa-plug"></i> Provar</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- VIEW: BUTTONS MANAGEMENT -->
-        <div class="view" id="view-buttons">
-            <div class="settings-section">
-                <div class="section-title"><i class="fas fa-plus-circle"></i> Nou Botó</div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Grup</label>
-                        <input type="text" id="inputBtnGroup" class="form-input" placeholder="Ex: Llum Menjador">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Text del botó</label>
-                        <input type="text" id="inputBtnLabel" class="form-input" placeholder="Ex: Encendre">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Comanda</label>
-                        <input type="text" id="inputBtnCommand" class="form-input" placeholder="Ex: /llum_on">
-                    </div>
-                </div>
-                <button class="btn btn-success" id="btnAddButton" style="margin-top:4px"><i class="fas fa-plus"></i> Crear Botó</button>
-            </div>
-
-            <div class="settings-section">
-                <div class="section-title" style="justify-content:space-between">
-                    <span><i class="fas fa-list-ul"></i> Botons Actuals</span>
-                    <span class="badge" id="btnCount">0</span>
-                </div>
-                <div id="settingsButtonsList"></div>
-            </div>
-        </div>
-
-        <!-- VIEW: BACKUP -->
-        <div class="view" id="view-backup">
-            <div class="settings-section">
-                <div class="section-title"><i class="fas fa-cloud-arrow-down"></i> Còpia de Seguretat</div>
-                <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px">
-                    Exporta o importa tota la configuració: botons, grups i credencials de l'API.
-                </p>
-
-                <div class="backup-card">
-                    <div class="backup-icon backup-icon-export"><i class="fas fa-file-export"></i></div>
-                    <div class="backup-text">
-                        <div class="backup-title">Exportar Configuració</div>
-                        <div class="backup-desc">Descarrega un fitxer JSON amb tots els botons i ajustos</div>
-                    </div>
-                    <button class="btn btn-primary" style="width:auto;padding:8px 16px" id="btnExport">
-                        <i class="fas fa-download"></i>
-                    </button>
-                </div>
-
-                <div class="backup-card">
-                    <div class="backup-icon backup-icon-import"><i class="fas fa-file-import"></i></div>
-                    <div class="backup-text">
-                        <div class="backup-title">Importar Configuració</div>
-                        <div class="backup-desc">Carrega un fitxer JSON prèviament exportat</div>
-                    </div>
-                    <button class="btn btn-purple" style="width:auto;padding:8px 16px" id="btnImport">
-                        <i class="fas fa-upload"></i>
-                    </button>
-                </div>
-                <input type="file" id="importFileInput" accept=".json">
-            </div>
-
-            <div class="settings-section">
-                <div class="section-title"><i class="fas fa-trash-arrow-up"></i> Reiniciar</div>
-                <p style="color:var(--text-secondary);font-size:14px;margin-bottom:14px">
-                    Restableix els botons als valors per defecte. Aquesta acció no es pot desfer.
-                </p>
-                <button class="btn btn-danger" id="btnReset"><i class="fas fa-rotate-left"></i> Restablir Botons per Defecte</button>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- MODAL: EDIT BUTTON -->
-    <div class="modal-overlay" id="editModal">
-        <div class="modal">
-            <div class="modal-title"><i class="fas fa-pen-to-square"></i> Editar Botó</div>
-            <input type="hidden" id="editBtnId">
-            <div class="form-group">
-                <label class="form-label">Grup</label>
-                <input type="text" id="editBtnGroup" class="form-input" placeholder="Ex: Llum Menjador">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Text del botó</label>
-                <input type="text" id="editBtnLabel" class="form-input" placeholder="Ex: Encendre">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Comanda</label>
-                <input type="text" id="editBtnCommand" class="form-input" placeholder="Ex: /llum_on">
-            </div>
-            <div class="btn-row">
-                <button class="btn btn-ghost" id="btnEditCancel"><i class="fas fa-times"></i> Cancel·lar</button>
-                <button class="btn btn-success" id="btnEditSave"><i class="fas fa-check"></i> Guardar</button>
-            </div>
-        </div>
+    <!-- PAS 1 -->
+    <div class="login-step active" id="step1">
+      <div class="step-label">Pas 1 de 3 — Credencials</div>
+      <div class="info-note">
+        Obtén <strong>API ID</strong> i <strong>API Hash</strong> a
+        <a href="https://my.telegram.org" target="_blank">my.telegram.org</a> → API Development.
+        Es guarden <strong>només al teu dispositiu</strong>.
+      </div>
+      <div class="form-group"><label class="form-label">API ID</label>
+        <input type="number" id="loginApiId" class="form-input" placeholder="Ex: 24353775">
+      </div>
+      <div class="form-group"><label class="form-label">API Hash</label>
+        <input type="text" id="loginApiHash" class="form-input" placeholder="Ex: e4b66269e9857030...">
+      </div>
+      <div class="form-group"><label class="form-label">Número de telèfon</label>
+        <input type="tel" id="loginPhone" class="form-input" placeholder="Ex: +34612345678">
+      </div>
+      <div class="form-group"><label class="form-label">Chat ID del grup domòtica</label>
+        <input type="text" id="loginChatId" class="form-input" placeholder="Ex: -1003082954760">
+      </div>
+      <button class="btn btn-primary" id="btnSendCode" style="margin-top:8px">
+        <i class="fas fa-paper-plane"></i> Enviar codi SMS
+      </button>
     </div>
 
-    <!-- TOAST CONTAINER -->
-    <div id="toastContainer"></div>
+    <!-- PAS 2 -->
+    <div class="login-step" id="step2">
+      <div class="step-label">Pas 2 de 3 — Verificació</div>
+      <div class="info-note">T'hem enviat un codi per Telegram. Introdueix-lo aquí.</div>
+      <div class="form-group"><label class="form-label">Codi de verificació</label>
+        <input type="number" id="loginCode" class="form-input" placeholder="Ex: 12345">
+      </div>
+      <div id="twoFAGroup" class="form-group" style="display:none">
+        <label class="form-label">Contrasenya 2FA</label>
+        <input type="password" id="login2FA" class="form-input" placeholder="Contrasenya de dos factors">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="btnBackStep1"><i class="fas fa-arrow-left"></i> Tornar</button>
+        <button class="btn btn-success" id="btnVerifyCode"><i class="fas fa-check"></i> Verificar</button>
+      </div>
+    </div>
 
-    <script>
-    // =============================================
-    // DATA MANAGER
-    // =============================================
-    const DataManager = {
-        defaultButtons: [
-            { id: 1, group: 'Endoll 1', label: 'Encendre', command: '/e1' },
-            { id: 2, group: 'Endoll 1', label: 'Apagar', command: '/e1off' },
-            { id: 3, group: 'Endoll 2', label: 'Encendre', command: '/end2' },
-            { id: 4, group: 'Endoll 2', label: 'Apagar', command: '/end2off' },
-            { id: 5, group: 'Persiana', label: 'Pujar', command: '/pujar_persiana' },
-            { id: 6, group: 'Persiana', label: 'Baixar', command: '/baixar_persiana' },
-            { id: 7, group: 'Persiana', label: 'Parar', command: '/parar_persiana' },
-            { id: 8, group: 'Llum Menjador', label: 'Encendre', command: '/llum_menjador_on' },
-            { id: 9, group: 'Llum Menjador', label: 'Apagar', command: '/llum_menjador_off' },
-            { id: 10, group: 'Rentaplats', label: 'Encendre', command: '/rentaplats_on' },
-            { id: 11, group: 'Rentaplats', label: 'Apagar', command: '/rentaplats_off' }
-        ],
+    <!-- PAS 3 -->
+    <div class="login-step" id="step3">
+      <div style="text-align:center;padding:10px 0 20px">
+        <i class="fas fa-circle-check" style="font-size:48px;color:var(--accent-green);display:block;margin-bottom:12px;filter:drop-shadow(0 0 12px var(--accent-green))"></i>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent-green);margin-bottom:6px">Connectat!</div>
+        <div id="loginSuccessMsg" style="font-size:14px;color:var(--text-secondary)"></div>
+      </div>
+      <button class="btn btn-primary" id="btnEnterApp"><i class="fas fa-arrow-right"></i> Entrar a l'app</button>
+    </div>
+  </div>
+</div>
 
-        getMode() { return localStorage.getItem('send_mode') || 'bot'; },
-        saveMode(mode) { localStorage.setItem('send_mode', mode); },
+<!-- APP -->
+<header>
+  <div class="logo">
+    <div class="logo-icon"><i class="fas fa-house-signal"></i></div>
+    <span class="logo-text">Domòtica</span>
+  </div>
+  <div class="header-actions">
+    <div class="user-pill" id="userPill">
+      <span class="dot"></span>
+      <span id="userPillName">—</span>
+    </div>
+    <div class="header-btn" id="btnSettingsHeader"><i class="fas fa-sliders"></i></div>
+  </div>
+</header>
 
-        getConfig() {
-            return {
-                botToken: localStorage.getItem('tg_bot_token') || '',
-                chatId: localStorage.getItem('tg_chat_id') || '',
-                userbotUrl: localStorage.getItem('tg_userbot_url') || 'http://localhost:8765'
-            };
-        },
+<div class="nav-tabs">
+  <div class="nav-tab active" data-view="control"><i class="fas fa-toggle-on" style="margin-right:5px"></i>Control</div>
+  <div class="nav-tab" data-view="buttons"><i class="fas fa-table-cells" style="margin-right:5px"></i>Botons</div>
+  <div class="nav-tab" data-view="settings"><i class="fas fa-gear" style="margin-right:5px"></i>Ajustos</div>
+  <div class="nav-tab" data-view="backup"><i class="fas fa-cloud-arrow-down" style="margin-right:5px"></i>Còpia</div>
+</div>
 
-        saveConfig(botToken, chatId) {
-            localStorage.setItem('tg_bot_token', botToken.trim());
-            localStorage.setItem('tg_chat_id', chatId.trim());
-        },
+<main>
+  <!-- CONTROL -->
+  <div class="view active" id="view-control"><div id="controlsContainer"></div></div>
 
-        saveUserbotUrl(url) { localStorage.setItem('tg_userbot_url', url.trim()); },
+  <!-- BUTTONS -->
+  <div class="view" id="view-buttons">
+    <div class="settings-section">
+      <div class="section-title"><i class="fas fa-plus-circle"></i> Nou Botó</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Grup</label><input type="text" id="inputBtnGroup" class="form-input" placeholder="Ex: Llum Menjador"></div>
+        <div class="form-group"><label class="form-label">Text</label><input type="text" id="inputBtnLabel" class="form-input" placeholder="Ex: Encendre"></div>
+        <div class="form-group"><label class="form-label">Comanda</label><input type="text" id="inputBtnCommand" class="form-input" placeholder="Ex: /llum_on"></div>
+      </div>
+      <button class="btn btn-success" id="btnAddButton" style="margin-top:4px"><i class="fas fa-plus"></i> Crear Botó</button>
+    </div>
+    <div class="settings-section">
+      <div class="section-title" style="justify-content:space-between">
+        <span><i class="fas fa-list-ul"></i> Botons Actuals</span>
+        <span class="badge" id="btnCount">0</span>
+      </div>
+      <div id="settingsButtonsList"></div>
+    </div>
+  </div>
 
-        getButtons() {
-            const btns = localStorage.getItem('tg_buttons');
-            return btns ? JSON.parse(btns) : [...this.defaultButtons];
-        },
+  <!-- SETTINGS -->
+  <div class="view" id="view-settings">
+    <div class="settings-section">
+      <div class="section-title"><i class="fas fa-gear"></i> Configuració</div>
+      <div class="form-group">
+        <label class="form-label">Chat ID del grup de domòtica</label>
+        <input type="text" id="settingsChatId" class="form-input" placeholder="Ex: -1003082954760">
+      </div>
+      <button class="btn btn-primary" id="btnSaveSettings"><i class="fas fa-save"></i> Guardar</button>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-subtle)">
+        <button class="btn btn-danger" id="btnLogout"><i class="fas fa-right-from-bracket"></i> Tancar sessió</button>
+      </div>
+    </div>
+  </div>
 
-        saveButtons(buttonsArray) { localStorage.setItem('tg_buttons', JSON.stringify(buttonsArray)); },
+  <!-- BACKUP -->
+  <div class="view" id="view-backup">
+    <div class="settings-section">
+      <div class="section-title"><i class="fas fa-cloud-arrow-down"></i> Còpia de Seguretat</div>
+      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px">Les credencials de Telegram <strong>no s'inclouen</strong> per seguretat. Només els botons.</p>
+      <div class="backup-card">
+        <div class="backup-icon" style="background:rgba(0,119,255,0.15);border-color:rgba(0,119,255,0.3);color:var(--accent-blue)"><i class="fas fa-file-export"></i></div>
+        <div class="backup-text"><div class="backup-title">Exportar Botons</div><div class="backup-desc">Descarrega un fitxer JSON</div></div>
+        <button class="btn btn-primary" style="width:auto;padding:8px 16px" id="btnExport"><i class="fas fa-download"></i></button>
+      </div>
+      <div class="backup-card">
+        <div class="backup-icon" style="background:rgba(124,77,255,0.15);border-color:rgba(124,77,255,0.3);color:var(--accent-purple)"><i class="fas fa-file-import"></i></div>
+        <div class="backup-text"><div class="backup-title">Importar Botons</div><div class="backup-desc">Carrega un fitxer JSON</div></div>
+        <button class="btn btn-ghost" style="width:auto;padding:8px 16px;border-color:rgba(124,77,255,0.3);color:var(--accent-purple)" id="btnImport"><i class="fas fa-upload"></i></button>
+      </div>
+      <input type="file" id="importFileInput" accept=".json">
+      <div style="margin-top:14px">
+        <button class="btn btn-danger" id="btnReset"><i class="fas fa-rotate-left"></i> Restablir Botons per Defecte</button>
+      </div>
+    </div>
+  </div>
+</main>
 
-        addButton(group, label, command) {
-            const btns = this.getButtons();
-            const newId = btns.length > 0 ? Math.max(...btns.map(b => b.id)) + 1 : 1;
-            btns.push({ id: newId, group: group.trim(), label: label.trim(), command: command.trim() });
-            this.saveButtons(btns);
-        },
+<!-- MODAL EDIT -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title"><i class="fas fa-pen-to-square"></i> Editar Botó</div>
+    <input type="hidden" id="editBtnId">
+    <div class="form-group"><label class="form-label">Grup</label><input type="text" id="editBtnGroup" class="form-input"></div>
+    <div class="form-group"><label class="form-label">Text</label><input type="text" id="editBtnLabel" class="form-input"></div>
+    <div class="form-group"><label class="form-label">Comanda</label><input type="text" id="editBtnCommand" class="form-input"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="btnEditCancel"><i class="fas fa-times"></i> Cancel·lar</button>
+      <button class="btn btn-success" id="btnEditSave"><i class="fas fa-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
 
-        updateButton(id, group, label, command) {
-            const btns = this.getButtons().map(b =>
-                b.id === id ? { ...b, group: group.trim(), label: label.trim(), command: command.trim() } : b
-            );
-            this.saveButtons(btns);
-        },
+<div id="toastContainer"></div>
 
-        deleteButton(id) { this.saveButtons(this.getButtons().filter(b => b.id !== id)); },
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+// Deixa buit = el mateix domini (Vercel).
+// Mentre desenvolupes en local posa: "http://localhost:3000"
+const API_BASE = "";
 
-        exportBackup() {
-            return { version: 1, exportedAt: new Date().toISOString(), mode: this.getMode(), config: this.getConfig(), buttons: this.getButtons() };
-        },
+const DEFAULT_BUTTONS = [
+    {id:1,group:'Endoll 1',label:'Encendre',command:'/e1'},
+    {id:2,group:'Endoll 1',label:'Apagar',command:'/e1off'},
+    {id:3,group:'Endoll 2',label:'Encendre',command:'/end2'},
+    {id:4,group:'Endoll 2',label:'Apagar',command:'/end2off'},
+    {id:5,group:'Persiana',label:'Pujar',command:'/pujar_persiana'},
+    {id:6,group:'Persiana',label:'Baixar',command:'/baixar_persiana'},
+    {id:7,group:'Persiana',label:'Parar',command:'/parar_persiana'},
+    {id:8,group:'Llum Menjador',label:'Encendre',command:'/llum_menjador_on'},
+    {id:9,group:'Llum Menjador',label:'Apagar',command:'/llum_menjador_off'},
+    {id:10,group:'Rentaplats',label:'Encendre',command:'/rentaplats_on'},
+    {id:11,group:'Rentaplats',label:'Apagar',command:'/rentaplats_off'},
+];
 
-        importBackup(data) {
-            if (!data.version || !Array.isArray(data.buttons)) throw new Error('Format no vàlid');
-            this.saveButtons(data.buttons);
-            if (data.config) {
-                if (data.config.botToken) this.saveConfig(data.config.botToken, data.config.chatId || '');
-                if (data.config.userbotUrl) this.saveUserbotUrl(data.config.userbotUrl);
-            }
-            if (data.mode) this.saveMode(data.mode);
-        },
+// ═══════════════════════════════════════════════
+// STORAGE — tot al localStorage del dispositiu
+// ═══════════════════════════════════════════════
+const Store = {
+    _g: (k,d=null) => { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch { return d; } },
+    _s: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
+    _d: (k) => localStorage.removeItem(k),
 
-        resetToDefaults() { this.saveButtons([...this.defaultButtons]); }
-    };
+    getSession:  () => Store._g('tg_session', null),
+    getApiId:    () => Store._g('tg_api_id', null),
+    getApiHash:  () => Store._g('tg_api_hash', null),
+    getChatId:   () => Store._g('tg_chat_id', null),
+    getUserName: () => Store._g('tg_user_name', null),
+    getButtons:  () => Store._g('tg_buttons', DEFAULT_BUTTONS),
 
-    // =============================================
-    // TELEGRAM API (Bot + Userbot)
-    // =============================================
-    const TelegramAPI = {
-        async sendMessage(command) {
-            const mode = DataManager.getMode();
-            return mode === 'userbot'
-                ? this.sendViaUserbot(command)
-                : this.sendViaBot(command);
-        },
+    saveAuth(apiId, apiHash, session, chatId, userName) {
+        Store._s('tg_api_id',   apiId);
+        Store._s('tg_api_hash', apiHash);
+        Store._s('tg_session',  session);
+        Store._s('tg_chat_id',  chatId);
+        Store._s('tg_user_name',userName);
+    },
+    saveButtons: (b) => Store._s('tg_buttons', b),
+    logout() { ['tg_session','tg_api_id','tg_api_hash','tg_chat_id','tg_user_name'].forEach(k=>Store._d(k)); },
+};
 
-        async sendViaBot(command) {
-            const config = DataManager.getConfig();
-            if (!config.botToken || !config.chatId) {
-                UI.showToast('⚠️ Configura la Bot API a Ajustos', 'error');
-                UI.showView('settings');
-                return false;
-            }
-            const url = `https://api.telegram.org/bot${config.botToken}/sendMessage`;
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: config.chatId, text: command })
-                });
-                const data = await res.json();
-                if (data.ok) return true;
-                UI.showToast(`⚠️ Bot: ${data.description}`, 'error');
-                return false;
-            } catch {
-                UI.showToast('❌ Error de connexió (Bot API)', 'error');
-                return false;
-            }
-        },
+// ═══════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════
+let loginState = {};
 
-        async sendViaUserbot(command) {
-            const { userbotUrl } = DataManager.getConfig();
-            if (!userbotUrl) {
-                UI.showToast('⚠️ Configura la URL del servidor a Ajustos', 'error');
-                UI.showView('settings');
-                return false;
-            }
-            try {
-                const res = await fetch(`${userbotUrl}/send`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command })
-                });
-                const data = await res.json();
-                if (data.ok) return true;
-                UI.showToast(`⚠️ Userbot: ${data.error}`, 'error');
-                return false;
-            } catch {
-                UI.showToast('❌ No es pot connectar al servidor local', 'error');
-                return false;
-            }
-        },
+const Login = {
+    showStep(n) {
+        document.querySelectorAll('.login-step').forEach(s=>s.classList.remove('active'));
+        document.getElementById(`step${n}`).classList.add('active');
+    },
 
-        async testBot(token, chatId) {
-            const url = `https://api.telegram.org/bot${token}/sendMessage`;
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: chatId, text: '🔌 Prova connexió Domòtica ✓' })
+    async sendCode() {
+        const apiId   = document.getElementById('loginApiId').value.trim();
+        const apiHash = document.getElementById('loginApiHash').value.trim();
+        const phone   = document.getElementById('loginPhone').value.trim();
+        const chatId  = document.getElementById('loginChatId').value.trim();
+
+        if (!apiId||!apiHash||!phone||!chatId) { showToast('⚠️ Omple tots els camps','error'); return; }
+
+        setBtnLoading('btnSendCode', true, 'Enviant...');
+        try {
+            const res = await fetch(`${API_BASE}/api/send_code`, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({api_id:parseInt(apiId), api_hash:apiHash, phone})
             });
-            return await res.json();
-        },
+            const data = await res.json();
+            if (data.ok) {
+                loginState = {apiId:parseInt(apiId), apiHash, phone, chatId,
+                              partialSession:data.partial_session, phoneCodeHash:data.phone_code_hash};
+                this.showStep(2);
+                showToast('📱 Codi enviat per Telegram!','success');
+            } else {
+                showToast(`❌ ${data.error}`,'error');
+            }
+        } catch(e) { showToast('❌ Error connectant amb el servidor','error'); }
+        setBtnLoading('btnSendCode', false, '<i class="fas fa-paper-plane"></i> Enviar codi SMS');
+    },
 
-        async testUserbot(userbotUrl) {
-            const res = await fetch(`${userbotUrl}/health`);
-            return await res.json();
+    async verifyCode() {
+        const code     = document.getElementById('loginCode').value.trim();
+        const password = document.getElementById('login2FA').value.trim();
+        if (!code) { showToast('⚠️ Introdueix el codi','error'); return; }
+
+        setBtnLoading('btnVerifyCode', true, 'Verificant...');
+        try {
+            const res = await fetch(`${API_BASE}/api/verify_code`, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    api_id:loginState.apiId, api_hash:loginState.apiHash,
+                    phone:loginState.phone, code,
+                    phone_code_hash:loginState.phoneCodeHash,
+                    partial_session:loginState.partialSession,
+                    password
+                })
+            });
+            const data = await res.json();
+
+            if (data.needs_2fa) {
+                document.getElementById('twoFAGroup').style.display='block';
+                showToast('🔐 Introdueix la contrasenya 2FA','info');
+                setBtnLoading('btnVerifyCode', false, '<i class="fas fa-check"></i> Verificar');
+                return;
+            }
+            if (data.ok) {
+                Store.saveAuth(loginState.apiId, loginState.apiHash, data.session_string,
+                               loginState.chatId, data.name||data.username);
+                document.getElementById('loginSuccessMsg').textContent = `Benvingut, ${data.name||data.username}!`;
+                this.showStep(3);
+            } else {
+                showToast(`❌ ${data.error}`,'error');
+            }
+        } catch(e) { showToast('❌ Error de connexió','error'); }
+        setBtnLoading('btnVerifyCode', false, '<i class="fas fa-check"></i> Verificar');
+    },
+
+    enterApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        App.init();
+    }
+};
+
+// ═══════════════════════════════════════════════
+// TELEGRAM SEND
+// ═══════════════════════════════════════════════
+async function sendCommand(command) {
+    return fetch(`${API_BASE}/api/send`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+            api_id:   Store.getApiId(),
+            api_hash: Store.getApiHash(),
+            session_string: Store.getSession(),
+            command,
+            chat_id: parseInt(Store.getChatId())
+        })
+    }).then(r=>r.json());
+}
+
+// ═══════════════════════════════════════════════
+// APP
+// ═══════════════════════════════════════════════
+const App = {
+    init() {
+        document.querySelectorAll('.nav-tab').forEach(t=>
+            t.addEventListener('click', ()=>this.showView(t.dataset.view)));
+        document.getElementById('btnSettingsHeader').addEventListener('click', ()=>this.showView('settings'));
+        document.getElementById('btnAddButton').addEventListener('click', ()=>this.handleAddButton());
+        document.getElementById('btnEditSave').addEventListener('click', ()=>this.handleEditSave());
+        document.getElementById('btnEditCancel').addEventListener('click', closeModal);
+        document.getElementById('editModal').addEventListener('click', e=>{ if(e.target.id==='editModal') closeModal(); });
+        document.getElementById('btnSaveSettings').addEventListener('click', ()=>this.handleSaveSettings());
+        document.getElementById('btnLogout').addEventListener('click', ()=>this.handleLogout());
+        document.getElementById('btnExport').addEventListener('click', ()=>this.handleExport());
+        document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('importFileInput').click());
+        document.getElementById('importFileInput').addEventListener('change', e=>this.handleImport(e));
+        document.getElementById('btnReset').addEventListener('click', ()=>this.handleReset());
+
+        const name = Store.getUserName();
+        if (name) document.getElementById('userPillName').textContent = name;
+
+        this.showView('control');
+    },
+
+    showView(name) {
+        document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+        document.getElementById(`view-${name}`).classList.add('active');
+        document.querySelector(`[data-view="${name}"]`).classList.add('active');
+        if (name==='control') this.renderControl();
+        if (name==='buttons') this.renderButtonsList();
+        if (name==='settings') this.renderSettings();
+    },
+
+    renderControl() {
+        const c = document.getElementById('controlsContainer');
+        c.innerHTML = '';
+        const buttons = Store.getButtons();
+        if (!buttons.length) { c.innerHTML=`<div class="empty-state"><i class="fas fa-ghost"></i><p>No hi ha botons.<br>Afegeix-ne a la pestanya Botons.</p></div>`; return; }
+        const grouped = buttons.reduce((acc,b)=>{ (acc[b.group]=acc[b.group]||[]).push(b); return acc; },{});
+        for (const [gName,btns] of Object.entries(grouped)) {
+            const card = document.createElement('div');
+            card.className='group-card';
+            card.innerHTML=`<div class="group-header"><div class="group-indicator"></div><span class="group-title">${esc(gName)}</span></div><div class="btn-grid"></div>`;
+            const grid=card.querySelector('.btn-grid');
+            btns.forEach(btn=>{
+                const b=document.createElement('button');
+                const l=btn.label.toLowerCase();
+                let cls='ctrl-btn btn-neutral';
+                if(l.includes('encend')||l.includes('pujar')||l.includes('obrir')) cls='ctrl-btn btn-on';
+                if(l.includes('apag')||l.includes('baixar')||l.includes('tancar')) cls='ctrl-btn btn-off';
+                b.className=cls;
+                b.innerHTML=`<span class="btn-label">${esc(btn.label)}</span><span class="btn-cmd">${esc(btn.command)}</span>`;
+                b.addEventListener('click',()=>this.handleSend(btn.command,b));
+                grid.appendChild(b);
+            });
+            c.appendChild(card);
         }
-    };
+    },
 
-    // =============================================
-    // UI
-    // =============================================
-    const UI = {
-        currentView: 'control',
-
-        init() {
-            // Nav tabs
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', () => this.showView(tab.dataset.view));
-            });
-
-            // Header settings button
-            document.getElementById('btnSettingsHeader').addEventListener('click', () => this.showView('settings'));
-
-            // Mode selector
-            document.querySelectorAll('.mode-card').forEach(card => {
-                card.addEventListener('click', () => this.selectMode(card.dataset.mode));
-            });
-
-            // Bot API buttons
-            document.getElementById('btnSaveApi').addEventListener('click', () => this.handleSaveApi());
-            document.getElementById('btnTestApi').addEventListener('click', () => this.handleTestApi());
-
-            // Userbot buttons
-            document.getElementById('btnSaveUserbot').addEventListener('click', () => this.handleSaveUserbot());
-            document.getElementById('btnTestUserbot').addEventListener('click', () => this.handleTestUserbot());
-
-            // Button management
-            document.getElementById('btnAddButton').addEventListener('click', () => this.handleAddButton());
-
-            // Edit modal
-            document.getElementById('btnEditSave').addEventListener('click', () => this.handleEditSave());
-            document.getElementById('btnEditCancel').addEventListener('click', () => this.closeModal());
-            document.getElementById('editModal').addEventListener('click', (e) => {
-                if (e.target === document.getElementById('editModal')) this.closeModal();
-            });
-
-            // Backup
-            document.getElementById('btnExport').addEventListener('click', () => this.handleExport());
-            document.getElementById('btnImport').addEventListener('click', () => document.getElementById('importFileInput').click());
-            document.getElementById('importFileInput').addEventListener('change', (e) => this.handleImport(e));
-            document.getElementById('btnReset').addEventListener('click', () => this.handleReset());
-
-            // Init mode UI
-            const savedMode = DataManager.getMode();
-            this.selectMode(savedMode, true); // silent: no guardar
-
-            const config = DataManager.getConfig();
-            const isConfigured = savedMode === 'userbot'
-                ? !!config.userbotUrl
-                : (!!config.botToken && !!config.chatId);
-
-            this.updateStatusIndicator(false); // es comprovarà en connectar
-
-            if (!isConfigured) {
-                this.showView('settings');
-                this.showToast('👋 Benvingut! Configura la connexió a Ajustos', 'info');
+    async handleSend(command, btnEl) {
+        const orig=btnEl.innerHTML, origCls=btnEl.className;
+        btnEl.className='ctrl-btn sending';
+        btnEl.innerHTML=`<i class="fas fa-spinner fa-spin"></i><span class="btn-cmd">Enviant...</span>`;
+        btnEl.disabled=true;
+        try {
+            const data = await sendCommand(command);
+            if (data.ok) {
+                showToast(`✅ ${command}`,'success');
+            } else if (data.error&&data.error.includes('Sessió no vàlida')) {
+                showToast('❌ Sessió caducada. Torna a fer login.','error');
+                this.handleLogout();
             } else {
-                this.showView('control');
+                showToast(`⚠️ ${data.error}`,'error');
             }
-        },
+        } catch { showToast('❌ Error de connexió','error'); }
+        setTimeout(()=>{ btnEl.className=origCls; btnEl.innerHTML=orig; btnEl.disabled=false; },400);
+    },
 
-        selectMode(mode, silent = false) {
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-            const card = document.querySelector(`[data-mode="${mode}"]`);
-            if (card) card.classList.add('selected');
-
-            document.getElementById('sectionBotApi').style.display  = (mode === 'bot')      ? 'block' : 'none';
-            document.getElementById('sectionUserbot').style.display = (mode === 'userbot') ? 'block' : 'none';
-
-            if (!silent) {
-                DataManager.saveMode(mode);
-                this.showToast(mode === 'userbot' ? '🔄 Mode Userbot activat' : '🤖 Mode Bot API activat', 'info');
-            }
-        },
-
-        showView(viewName) {
-            this.currentView = viewName;
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-
-            const viewEl = document.getElementById(`view-${viewName}`);
-            if (viewEl) viewEl.classList.add('active');
-
-            const tabEl = document.querySelector(`[data-view="${viewName}"]`);
-            if (tabEl) tabEl.classList.add('active');
-
-            if (viewName === 'control') this.renderControlPanel();
-            if (viewName === 'settings') this.renderSettingsPanel();
-            if (viewName === 'buttons') this.renderButtonsList();
-            if (viewName === 'backup') {}
-        },
-
-        // ---- CONTROL PANEL ----
-        renderControlPanel() {
-            const container = document.getElementById('controlsContainer');
-            container.innerHTML = '';
-            const buttons = DataManager.getButtons();
-
-            if (buttons.length === 0) {
-                container.innerHTML = `<div class="empty-state"><i class="fas fa-ghost"></i><p>No hi ha botons configurats.<br>Afegeix-ne a la pestanya Botons.</p></div>`;
-                return;
-            }
-
-            const grouped = buttons.reduce((acc, btn) => {
-                if (!acc[btn.group]) acc[btn.group] = [];
-                acc[btn.group].push(btn);
-                return acc;
-            }, {});
-
-            for (const [groupName, groupBtns] of Object.entries(grouped)) {
-                const card = document.createElement('div');
-                card.className = 'group-card';
-
-                card.innerHTML = `
-                    <div class="group-header">
-                        <div class="group-indicator"></div>
-                        <span class="group-title">${this.escHtml(groupName)}</span>
-                    </div>
-                    <div class="btn-grid"></div>
-                `;
-
-                const grid = card.querySelector('.btn-grid');
-                groupBtns.forEach(btn => {
-                    const b = document.createElement('button');
-                    const lbl = btn.label.toLowerCase();
-                    let cls = 'ctrl-btn btn-neutral';
-                    if (lbl.includes('encend') || lbl.includes('pujar') || lbl.includes('obrir')) cls = 'ctrl-btn btn-on';
-                    if (lbl.includes('apag') || lbl.includes('baixar') || lbl.includes('tancar')) cls = 'ctrl-btn btn-off';
-
-                    b.className = cls;
-                    b.innerHTML = `<span class="btn-label">${this.escHtml(btn.label)}</span><span class="btn-cmd">${this.escHtml(btn.command)}</span>`;
-                    b.addEventListener('click', () => this.handleCommandSend(btn.command, b));
-                    grid.appendChild(b);
-                });
-
-                container.appendChild(card);
-            }
-        },
-
-        async handleCommandSend(command, btnEl) {
-            const origHtml = btnEl.innerHTML;
-            const origCls = btnEl.className;
-            btnEl.className = 'ctrl-btn sending';
-            btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span class="btn-cmd">Enviant...</span>`;
-            btnEl.disabled = true;
-
-            const ok = await TelegramAPI.sendMessage(command);
-
-            setTimeout(() => {
-                btnEl.className = origCls;
-                btnEl.innerHTML = origHtml;
-                btnEl.disabled = false;
-                if (ok) this.showToast(`✅ ${command}`, 'success');
-            }, 400);
-        },
-
-        // ---- SETTINGS PANEL ----
-        renderSettingsPanel() {
-            const config = DataManager.getConfig();
-            document.getElementById('inputBotToken').value = config.botToken;
-            document.getElementById('inputChatId').value = config.chatId;
-            document.getElementById('inputUserbotUrl').value = config.userbotUrl;
-        },
-
-        handleSaveApi() {
-            const token = document.getElementById('inputBotToken').value;
-            const chatId = document.getElementById('inputChatId').value;
-            DataManager.saveConfig(token, chatId);
-            this.updateStatusIndicator(!!token.trim() && !!chatId.trim());
-            this.showToast('✅ Bot API guardada!', 'success');
-        },
-
-        async handleTestApi() {
-            const token = document.getElementById('inputBotToken').value.trim();
-            const chatId = document.getElementById('inputChatId').value.trim();
-            if (!token || !chatId) { this.showToast('⚠️ Introdueix Token i Chat ID', 'error'); return; }
-
-            const btn = document.getElementById('btnTestApi');
-            const orig = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Provant...';
-            btn.disabled = true;
-
-            try {
-                const data = await TelegramAPI.testBot(token, chatId);
-                if (data.ok) {
-                    this.showToast('✅ Bot API correcta!', 'success');
-                    this.updateStatusIndicator(true);
-                } else {
-                    let msg = data.description;
-                    if (msg.includes('Not Found')) msg = 'Token del Bot no vàlid';
-                    if (msg.includes('chat not found')) msg = 'Chat ID incorrecte';
-                    this.showToast(`❌ ${msg}`, 'error');
-                    this.updateStatusIndicator(false);
-                }
-            } catch { this.showToast('❌ Error de connexió', 'error'); }
-
-            btn.innerHTML = orig;
-            btn.disabled = false;
-        },
-
-        handleSaveUserbot() {
-            const url = document.getElementById('inputUserbotUrl').value;
-            DataManager.saveUserbotUrl(url);
-            this.showToast('✅ URL del servidor guardada!', 'success');
-        },
-
-        async handleTestUserbot() {
-            const url = document.getElementById('inputUserbotUrl').value.trim();
-            if (!url) { this.showToast('⚠️ Introdueix la URL del servidor', 'error'); return; }
-
-            const btn = document.getElementById('btnTestUserbot');
-            const orig = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Provant...';
-            btn.disabled = true;
-
-            try {
-                const data = await TelegramAPI.testUserbot(url);
-                if (data.ok) {
-                    this.showToast(`✅ Connectat! Usuari: ${data.user}`, 'success');
-                    this.updateStatusIndicator(true);
-                } else {
-                    this.showToast(`❌ Error: ${data.error || 'Resposta incorrecta'}`, 'error');
-                }
-            } catch {
-                this.showToast('❌ No es pot connectar al servidor local.\nComprova que userbot_server.py està en marxa.', 'error');
-                this.updateStatusIndicator(false);
-            }
-
-            btn.innerHTML = orig;
-            btn.disabled = false;
-        },
-
-        updateStatusIndicator(connected) {
-            const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
-            if (connected) {
-                dot.className = 'status-dot connected';
-                text.textContent = 'OK';
-                text.style.color = 'var(--accent-green)';
-            } else {
-                dot.className = 'status-dot error';
-                text.textContent = 'No config';
-                text.style.color = 'var(--accent-red)';
-            }
-        },
-
-        // ---- BUTTONS LIST ----
-        renderButtonsList() {
-            const list = document.getElementById('settingsButtonsList');
-            const buttons = DataManager.getButtons();
-
-            document.getElementById('btnCount').textContent = buttons.length;
-
-            if (buttons.length === 0) {
-                list.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>Cap botó configurat</p></div>`;
-                return;
-            }
-
-            list.innerHTML = '';
-            buttons.forEach(btn => {
-                const item = document.createElement('div');
-                item.className = 'btn-list-item';
-                item.innerHTML = `
-                    <div class="btn-list-info">
-                        <div class="btn-list-group">${this.escHtml(btn.group)}</div>
-                        <div class="btn-list-label">${this.escHtml(btn.label)}</div>
-                        <div class="btn-list-cmd">${this.escHtml(btn.command)}</div>
-                    </div>
-                    <div class="btn-list-actions">
-                        <div class="icon-btn icon-btn-edit" title="Editar"><i class="fas fa-pen"></i></div>
-                        <div class="icon-btn icon-btn-delete" title="Eliminar"><i class="fas fa-trash"></i></div>
-                    </div>
-                `;
-                item.querySelector('.icon-btn-edit').addEventListener('click', () => this.openEditModal(btn));
-                item.querySelector('.icon-btn-delete').addEventListener('click', () => {
-                    DataManager.deleteButton(btn.id);
-                    this.renderButtonsList();
-                    this.showToast('Botó eliminat', 'info');
-                });
-                list.appendChild(item);
-            });
-        },
-
-        handleAddButton() {
-            const group = document.getElementById('inputBtnGroup').value.trim();
-            const label = document.getElementById('inputBtnLabel').value.trim();
-            const command = document.getElementById('inputBtnCommand').value.trim();
-            if (!group || !label || !command) { this.showToast('⚠️ Omple tots els camps', 'error'); return; }
-
-            DataManager.addButton(group, label, command);
-            document.getElementById('inputBtnLabel').value = '';
-            document.getElementById('inputBtnCommand').value = '';
-            this.renderButtonsList();
-            this.showToast('✅ Botó afegit!', 'success');
-        },
-
-        // ---- EDIT MODAL ----
-        openEditModal(btn) {
-            document.getElementById('editBtnId').value = btn.id;
-            document.getElementById('editBtnGroup').value = btn.group;
-            document.getElementById('editBtnLabel').value = btn.label;
-            document.getElementById('editBtnCommand').value = btn.command;
-            document.getElementById('editModal').classList.add('open');
-        },
-
-        closeModal() {
-            document.getElementById('editModal').classList.remove('open');
-        },
-
-        handleEditSave() {
-            const id = parseInt(document.getElementById('editBtnId').value);
-            const group = document.getElementById('editBtnGroup').value.trim();
-            const label = document.getElementById('editBtnLabel').value.trim();
-            const command = document.getElementById('editBtnCommand').value.trim();
-            if (!group || !label || !command) { this.showToast('⚠️ Omple tots els camps', 'error'); return; }
-
-            DataManager.updateButton(id, group, label, command);
-            this.closeModal();
-            this.renderButtonsList();
-            this.showToast('✅ Botó actualitzat!', 'success');
-        },
-
-        // ---- BACKUP ----
-        handleExport() {
-            const data = DataManager.exportBackup();
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            const date = new Date().toISOString().split('T')[0];
-            a.href = url;
-            a.download = `domotica-backup-${date}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            this.showToast('✅ Còpia exportada!', 'success');
-        },
-
-        handleImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    DataManager.importBackup(data);
-                    this.showToast(`✅ Importat: ${data.buttons.length} botons`, 'success');
-                    this.renderButtonsList();
-                } catch (err) {
-                    this.showToast('❌ Error al importar: ' + err.message, 'error');
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        },
-
-        handleReset() {
-            if (confirm('Segur que vols restablir els botons per defecte? Es perdran els canvis actuals.')) {
-                DataManager.resetToDefaults();
+    renderButtonsList() {
+        const btns=Store.getButtons();
+        document.getElementById('btnCount').textContent=btns.length;
+        const list=document.getElementById('settingsButtonsList');
+        list.innerHTML='';
+        if(!btns.length){list.innerHTML=`<div class="empty-state"><i class="fas fa-inbox"></i><p>Cap botó configurat</p></div>`;return;}
+        btns.forEach(btn=>{
+            const item=document.createElement('div');
+            item.className='btn-list-item';
+            item.innerHTML=`<div class="btn-list-info"><div class="btn-list-group">${esc(btn.group)}</div><div class="btn-list-label">${esc(btn.label)}</div><div class="btn-list-cmd">${esc(btn.command)}</div></div><div class="btn-list-actions"><div class="icon-btn icon-btn-edit"><i class="fas fa-pen"></i></div><div class="icon-btn icon-btn-delete"><i class="fas fa-trash"></i></div></div>`;
+            item.querySelector('.icon-btn-edit').addEventListener('click',()=>openEditModal(btn));
+            item.querySelector('.icon-btn-delete').addEventListener('click',()=>{
+                Store.saveButtons(Store.getButtons().filter(b=>b.id!==btn.id));
                 this.renderButtonsList();
-                this.showToast('✅ Botons restablerts', 'info');
-            }
-        },
+                showToast('Botó eliminat','info');
+            });
+            list.appendChild(item);
+        });
+    },
 
-        // ---- TOAST ----
-        showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.transition = 'opacity 0.4s';
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 400);
-            }, 2800);
-        },
+    handleAddButton() {
+        const group=document.getElementById('inputBtnGroup').value.trim();
+        const label=document.getElementById('inputBtnLabel').value.trim();
+        const command=document.getElementById('inputBtnCommand').value.trim();
+        if(!group||!label||!command){showToast('⚠️ Omple tots els camps','error');return;}
+        const btns=Store.getButtons();
+        const id=btns.length?Math.max(...btns.map(b=>b.id))+1:1;
+        btns.push({id,group,label,command});
+        Store.saveButtons(btns);
+        document.getElementById('inputBtnLabel').value='';
+        document.getElementById('inputBtnCommand').value='';
+        this.renderButtonsList();
+        showToast('✅ Botó afegit!','success');
+    },
 
-        escHtml(str) {
-            const d = document.createElement('div');
-            d.appendChild(document.createTextNode(str));
-            return d.innerHTML;
-        }
-    };
+    handleEditSave() {
+        const id=parseInt(document.getElementById('editBtnId').value);
+        const group=document.getElementById('editBtnGroup').value.trim();
+        const label=document.getElementById('editBtnLabel').value.trim();
+        const command=document.getElementById('editBtnCommand').value.trim();
+        if(!group||!label||!command){showToast('⚠️ Omple tots els camps','error');return;}
+        Store.saveButtons(Store.getButtons().map(b=>b.id===id?{...b,group,label,command}:b));
+        closeModal();
+        this.renderButtonsList();
+        showToast('✅ Botó actualitzat!','success');
+    },
 
-    document.addEventListener('DOMContentLoaded', () => UI.init());
-    </script>
+    renderSettings() { document.getElementById('settingsChatId').value=Store.getChatId()||''; },
+
+    handleSaveSettings() {
+        const chatId=document.getElementById('settingsChatId').value.trim();
+        if(chatId) Store._s('tg_chat_id', chatId);
+        showToast('✅ Guardat!','success');
+    },
+
+    handleLogout() {
+        if(!confirm('Tancar la sessió?')) return;
+        Store.logout();
+        location.reload();
+    },
+
+    handleExport() {
+        const data={version:1,exportedAt:new Date().toISOString(),buttons:Store.getButtons()};
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+        a.download=`domotica-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        showToast('✅ Exportat!','success');
+    },
+
+    handleImport(e) {
+        const file=e.target.files[0]; if(!file) return;
+        const reader=new FileReader();
+        reader.onload=ev=>{
+            try {
+                const data=JSON.parse(ev.target.result);
+                if(!Array.isArray(data.buttons)) throw new Error('Format no vàlid');
+                Store.saveButtons(data.buttons);
+                this.renderButtonsList();
+                showToast(`✅ ${data.buttons.length} botons importats`,'success');
+            } catch(err){showToast(`❌ ${err.message}`,'error');}
+        };
+        reader.readAsText(file);
+        e.target.value='';
+    },
+
+    handleReset() {
+        if(!confirm('Restablir botons per defecte?')) return;
+        Store.saveButtons(DEFAULT_BUTTONS);
+        this.renderButtonsList();
+        showToast('✅ Botons restablerts','info');
+    },
+};
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function esc(s){const d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML;}
+
+function showToast(msg,type='info'){
+    const c=document.getElementById('toastContainer');
+    const t=document.createElement('div');
+    t.className=`toast toast-${type}`;
+    t.textContent=msg;
+    c.appendChild(t);
+    setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity 0.4s';setTimeout(()=>t.remove(),400);},2800);
+}
+
+function setBtnLoading(id,loading,label){
+    const btn=document.getElementById(id);
+    btn.disabled=loading;
+    btn.innerHTML=loading?`<i class="fas fa-spinner fa-spin"></i> ${label}`:label;
+}
+
+function openEditModal(btn){
+    document.getElementById('editBtnId').value=btn.id;
+    document.getElementById('editBtnGroup').value=btn.group;
+    document.getElementById('editBtnLabel').value=btn.label;
+    document.getElementById('editBtnCommand').value=btn.command;
+    document.getElementById('editModal').classList.add('open');
+}
+function closeModal(){document.getElementById('editModal').classList.remove('open');}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btnSendCode').addEventListener('click',   ()=>Login.sendCode());
+    document.getElementById('btnVerifyCode').addEventListener('click', ()=>Login.verifyCode());
+    document.getElementById('btnBackStep1').addEventListener('click',  ()=>Login.showStep(1));
+    document.getElementById('btnEnterApp').addEventListener('click',   ()=>Login.enterApp());
+
+    if (Store.getSession()) {
+        document.getElementById('loginScreen').style.display='none';
+        App.init();
+    }
+});
+</script>
 </body>
 </html>
